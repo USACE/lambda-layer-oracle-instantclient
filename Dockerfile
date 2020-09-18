@@ -3,28 +3,19 @@ FROM lambci/lambda:build-provided
 # Install system libraries
 RUN \
   yum makecache fast; \
-  yum install -y libaio \
+  yum install -y libaio wget \
   yum clean all; \
   yum autoremove
     
 # To find where libaio was installed: rpm -ql libaio
 
 #WORKDIR /build
-WORKDIR /src
+WORKDIR /home/src
 
 # Paths
 ENV \
-  INSTANT_CLIENT_ZIP_DIR=./oracle \
-  INSTANT_CLIENT_DIR=instantclient_18_5 \
-  BUILD_DIR=/build \
-  NPROC=1 \
-  BUILD_PACKAGE_NAME=lambda-oracle-instantclient.zip
+  INSTANT_CLIENT_DOWNLOAD_URL="https://download.oracle.com/otn_software/linux/instantclient/185000/instantclient-basiclite-linux.x64-18.5.0.0.0dbru.zip" \
+  BUILD_PACKAGE_NAME=lambda-layer-oracle-instantclient-18.5.0.0.0.zip \
+  PATH="$PATH:/home/src"
 
-# Copy Code to Container
-ADD . .
-
-RUN \
-  mkdir ${BUILD_DIR}; \
-  make -j ${NPROC} package
-    
-CMD ["/bin/bash"]
+COPY package.sh .
